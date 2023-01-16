@@ -1,23 +1,32 @@
 package net.foxtam.hyperskillorg.recipes.business;
 
+import net.foxtam.hyperskillorg.recipes.persistance.RecipesRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Component
 public class RecipeService {
-    private final ConcurrentMap<Integer, Recipe> recipes = new ConcurrentHashMap<>();
-    private int idCounter = 0;
 
-    public synchronized int addRecipe(Recipe recipe) {
-        idCounter++;
-        recipes.put(idCounter, recipe);
-        return idCounter;
+    private static final Logger log = LoggerFactory.getLogger(RecipeService.class);
+
+    private final RecipesRepository repository;
+
+    @Autowired
+    public RecipeService(RecipesRepository repository) {
+        this.repository = repository;
     }
 
-    public synchronized Optional<Recipe> getRecipe(int id) {
-        return Optional.ofNullable(recipes.get(id));
+    public synchronized long addRecipe(Recipe recipe) {
+        repository.save(recipe);
+        log.trace("addRecipe after save: {}", recipe);
+        return recipe.getId();
+    }
+
+    public synchronized Optional<Recipe> getRecipe(long id) {
+        return repository.findById(id);
     }
 }

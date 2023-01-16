@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString(exclude = {"ingredients", "directions"})
+@ToString
 @Entity
 @Table(name = "recipes")
 public class Recipe {
