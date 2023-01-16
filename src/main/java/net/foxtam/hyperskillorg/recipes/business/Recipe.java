@@ -1,11 +1,13 @@
 package net.foxtam.hyperskillorg.recipes.business;
 
-import lombok.*;
+import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class Recipe {
     private String name;
     private String description;
-    private String ingredients;
-    private String directions;
+    private List<String> ingredients;
+    private List<String> directions;
 }
