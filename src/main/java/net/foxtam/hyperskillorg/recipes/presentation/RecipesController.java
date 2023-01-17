@@ -10,14 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 public class RecipesController {
-    private static final Logger log = LoggerFactory.getLogger(RecipesController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecipesController.class);
     private final RecipeService recipeService;
 
     @Autowired
@@ -27,9 +25,7 @@ public class RecipesController {
 
     @PostMapping("/api/recipe/new")
     ResponseEntity<Map<?, ?>> postRecipe(@Valid @RequestBody Recipe recipe) {
-        log.trace("postRecipe before set date: {}", recipe);
-        recipe.setDate(LocalDateTime.now());
-        log.trace("postRecipe after set date: {}", recipe);
+        LOG.trace("postRecipe input: {}", recipe);
         long id = recipeService.addRecipe(recipe);
         return ResponseEntity.ok(Map.of("id", id));
     }
@@ -37,7 +33,7 @@ public class RecipesController {
     @GetMapping("/api/recipe/{id}")
     ResponseEntity<Recipe> getRecipe(@Valid @PathVariable long id) {
         Optional<Recipe> recipe = recipeService.getRecipe(id);
-        log.trace("getRecipe: {}", recipe);
+        LOG.trace("getRecipe: {}", recipe);
         return recipe.map(ResponseEntity::ok)
                 .orElseGet(ResponseEntity.notFound()::build);
     }
@@ -46,5 +42,11 @@ public class RecipesController {
     ResponseEntity<?> deleteRecipe(@Valid @PathVariable long id) {
         boolean deleted = recipeService.deleteRecipe(id);
         return ResponseEntity.status(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
+    }
+
+    @PutMapping("/api/recipe/{id}")
+    ResponseEntity<?> putRecipe(@PathVariable long id, @Valid @RequestBody Recipe recipe) {
+        boolean updated = recipeService.updateRecipeById(id, recipe);
+        return ResponseEntity.status(updated ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
     }
 }
