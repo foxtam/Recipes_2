@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,13 @@ public class Recipe {
     @Column(name = "name")
     private String name;
 
+    @NotBlank
+    @Column(name = "category")
+    private String category;
+    
+    @Column(name = "date")
+    private LocalDateTime date;
+    
     @NotBlank
     @Column(name = "description")
     private String description;

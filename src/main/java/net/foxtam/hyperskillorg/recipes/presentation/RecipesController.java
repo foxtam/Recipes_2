@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +27,9 @@ public class RecipesController {
 
     @PostMapping("/api/recipe/new")
     ResponseEntity<Map<?, ?>> postRecipe(@Valid @RequestBody Recipe recipe) {
-        log.trace("postRecipe: {}", recipe);
+        log.trace("postRecipe before set date: {}", recipe);
+        recipe.setDate(LocalDateTime.now());
+        log.trace("postRecipe after set date: {}", recipe);
         long id = recipeService.addRecipe(recipe);
         return ResponseEntity.ok(Map.of("id", id));
     }
