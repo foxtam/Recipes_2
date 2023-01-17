@@ -2,6 +2,8 @@ package net.foxtam.hyperskillorg.recipes.business;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,18 +19,22 @@ import java.util.List;
 @Entity
 @Table(name = "recipes")
 public class Recipe {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @JsonIgnore
     private long id;
 
+    @NotBlank
     @Column(name = "name")
     private String name;
 
+    @NotBlank
     @Column(name = "description")
     private String description;
 
+    @Size(min = 1)
     @ElementCollection
     @CollectionTable(
             name = "ingredients",
@@ -36,6 +42,7 @@ public class Recipe {
     @Column(name = "ingredient")
     private List<String> ingredients = new ArrayList<>();
 
+    @Size(min = 1)
     @ElementCollection
     @CollectionTable(
             name = "directions",

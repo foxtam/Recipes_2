@@ -20,13 +20,19 @@ public class RecipeService {
         this.repository = repository;
     }
 
-    public synchronized long addRecipe(Recipe recipe) {
+    public long addRecipe(Recipe recipe) {
         repository.save(recipe);
         log.trace("addRecipe after save: {}", recipe);
         return recipe.getId();
     }
 
-    public synchronized Optional<Recipe> getRecipe(long id) {
+    public Optional<Recipe> getRecipe(long id) {
         return repository.findById(id);
+    }
+
+    public boolean deleteRecipe(long id) {
+        Optional<Recipe> optional = repository.findById(id);
+        optional.ifPresent(recipe -> repository.deleteById(recipe.getId()));
+        return optional.isPresent();
     }
 }
