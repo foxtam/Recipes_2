@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,18 +37,30 @@ public class RecipesController {
         Optional<Recipe> recipe = recipeService.getRecipe(id);
         LOG.trace("getRecipe: {}", recipe);
         return recipe.map(ResponseEntity::ok)
-                .orElseGet(ResponseEntity.notFound()::build);
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/api/recipe/{id}")
     ResponseEntity<?> deleteRecipe(@Valid @PathVariable long id) {
         boolean deleted = recipeService.deleteRecipe(id);
-        return ResponseEntity.status(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
+        return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/api/recipe/{id}")
     ResponseEntity<?> putRecipe(@PathVariable long id, @Valid @RequestBody Recipe recipe) {
         boolean updated = recipeService.updateRecipeById(id, recipe);
-        return ResponseEntity.status(updated ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
+        return new ResponseEntity<>(updated ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/api/recipe/search")
+    ResponseEntity<?> getRecipes(@RequestParam(required = false) String category,
+                                 @RequestParam(required = false) String name) {
+        if (Collections.frequency(Arrays.asList(name, category), null) != 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (category != null) {
+            return ResponseEntity.ok(recipeService.getRecipesByCategory(category));
+        } else {
+            return ResponseEntity.ok(recipeService.getContainingName(name));
+        }
     }
 }

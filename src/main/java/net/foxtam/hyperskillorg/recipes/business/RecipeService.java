@@ -5,8 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -33,22 +35,25 @@ public class RecipeService {
     }
 
     public boolean deleteRecipe(long id) {
-        Optional<Recipe> optionalRecipe = repository.findById(id);
-        optionalRecipe.ifPresent(recipe -> repository.deleteById(recipe.getId()));
-        return optionalRecipe.isPresent();
+        return repository.deleteRecipeById(id) > 0;
     }
 
-    public boolean updateRecipeById(long id, Recipe newRecipe) {
-        Optional<Recipe> optionalRecipe = repository.findById(id);
-        optionalRecipe.ifPresent(recipe -> {
-            recipe.setName(newRecipe.getName());
-            recipe.setCategory(newRecipe.getCategory());
+    @Transactional
+    public boolean updateRecipeById(long id, Recipe recipe) {
+        boolean exists = repository.existsById(id);
+        if (exists) {
+            recipe.setId(id);
             recipe.setDate(LocalDateTime.now());
-            recipe.setDescription(newRecipe.getDescription());
-            recipe.setIngredients(newRecipe.getIngredients());
-            recipe.setDirections(newRecipe.getDirections());
             repository.save(recipe);
-        });
-        return optionalRecipe.isPresent();
+        }
+        return exists;
+    }
+
+    public List<Recipe> getRecipesByCategory(String category) {
+        return repository.findByCategoryIgnoreCaseOrderByDateDesc(category);
+    }
+
+    public List<Recipe> getContainingName(String name) {
+        return repository.findByNameContainingIgnoreCaseOrderByDateDesc(name);
     }
 }
