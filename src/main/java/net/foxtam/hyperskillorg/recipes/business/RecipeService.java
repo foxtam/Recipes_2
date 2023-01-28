@@ -13,9 +13,7 @@ import java.util.Optional;
 
 @Component
 public class RecipeService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RecipeService.class);
-
+    private static final Logger log = LoggerFactory.getLogger(RecipeService.class);
     private final RecipesRepository repository;
 
     @Autowired
@@ -24,9 +22,10 @@ public class RecipeService {
     }
 
     public long addRecipe(Recipe recipe) {
+        log.trace("add recipe: {}", recipe);
         recipe.setDate(LocalDateTime.now());
         repository.save(recipe);
-        LOG.trace("addRecipe after save: {}", recipe);
+        log.trace("add recipe: {}", recipe);
         return recipe.getId();
     }
 

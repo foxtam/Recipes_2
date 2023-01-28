@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 public class RecipesController {
-    private static final Logger LOG = LoggerFactory.getLogger(RecipesController.class);
+    private static final Logger log = LoggerFactory.getLogger(RecipesController.class);
     private final RecipeService recipeService;
 
     @Autowired
@@ -27,21 +27,21 @@ public class RecipesController {
 
     @PostMapping("/api/recipe/new")
     ResponseEntity<Map<?, ?>> postRecipe(@Valid @RequestBody Recipe recipe) {
-        LOG.trace("postRecipe input: {}", recipe);
+        log.trace("postRecipe input: {}", recipe);
         long id = recipeService.addRecipe(recipe);
         return ResponseEntity.ok(Map.of("id", id));
     }
 
     @GetMapping("/api/recipe/{id}")
-    ResponseEntity<Recipe> getRecipe(@Valid @PathVariable long id) {
+    ResponseEntity<Recipe> getRecipe(@PathVariable long id) {
         Optional<Recipe> recipe = recipeService.getRecipe(id);
-        LOG.trace("getRecipe: {}", recipe);
+        log.trace("getRecipe: {}", recipe);
         return recipe.map(ResponseEntity::ok)
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/api/recipe/{id}")
-    ResponseEntity<?> deleteRecipe(@Valid @PathVariable long id) {
+    ResponseEntity<?> deleteRecipe(@PathVariable long id) {
         boolean deleted = recipeService.deleteRecipe(id);
         return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
     }
