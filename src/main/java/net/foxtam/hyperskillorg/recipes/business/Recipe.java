@@ -34,10 +34,11 @@ public class Recipe {
     @NotBlank
     @Column(name = "category")
     private String category;
-    
+
+    @Size(min = 8)
     @Column(name = "date")
     private LocalDateTime date;
-    
+
     @NotBlank
     @Column(name = "description")
     private String description;
