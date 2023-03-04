@@ -1,4 +1,4 @@
-package net.foxtam.hyperskillorg.recipes.business;
+package net.foxtam.hyperskillorg.recipes.persistance;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

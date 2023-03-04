@@ -1,5 +1,6 @@
 package net.foxtam.hyperskillorg.recipes.business;
 
+import net.foxtam.hyperskillorg.recipes.persistance.Recipe;
 import net.foxtam.hyperskillorg.recipes.persistance.RecipesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
