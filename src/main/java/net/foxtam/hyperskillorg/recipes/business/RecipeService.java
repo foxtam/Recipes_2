@@ -53,7 +53,7 @@ public class RecipeService {
         return repository.findByCategoryIgnoreCaseOrderByDateDesc(category);
     }
 
-    public List<Recipe> getContainingName(String name) {
+    public List<Recipe> getRecipesContainingName(String name) {
         return repository.findByNameContainingIgnoreCaseOrderByDateDesc(name);
     }
 }

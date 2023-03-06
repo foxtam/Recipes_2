@@ -20,12 +20,16 @@ import java.util.List;
 @Entity
 @Table(name = "recipes")
 public class Recipe {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @JsonIgnore
     private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
     @NotBlank
     @Column(name = "name")
@@ -34,9 +38,9 @@ public class Recipe {
     @NotBlank
     @Column(name = "category")
     private String category;
-
-    @Size(min = 8)
+    
     @Column(name = "date")
+    @JsonIgnore
     private LocalDateTime date;
 
     @NotBlank

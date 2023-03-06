@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,15 +23,20 @@ import java.util.Optional;
 public class RecipesController {
     private static final Logger log = LoggerFactory.getLogger(RecipesController.class);
     private final RecipeService recipeService;
+    private final UserService userService;
 
     @Autowired
-    public RecipesController(RecipeService recipeService) {
+    public RecipesController(RecipeService recipeService, UserService userService) {
         this.recipeService = recipeService;
+        this.userService = userService;
     }
 
     @PostMapping("/api/recipe/new")
-    ResponseEntity<Map<?, ?>> postRecipe(@Valid @RequestBody Recipe recipe) {
+    ResponseEntity<Map<?, ?>> postRecipe(@AuthenticationPrincipal UserDetails details,
+                                         @Valid @RequestBody Recipe recipe) {
         log.trace("postRecipe input: {}", recipe);
+        Optional<User> optionalUser = userService.getUserByEmail(details.getUsername());
+        recipe.setUser(optionalUser.orElseThrow());
         long id = recipeService.addRecipe(recipe);
         return ResponseEntity.ok(Map.of("id", id));
     }
@@ -44,15 +50,33 @@ public class RecipesController {
     }
 
     @DeleteMapping("/api/recipe/{id}")
-    ResponseEntity<?> deleteRecipe(@PathVariable long id) {
-        boolean deleted = recipeService.deleteRecipe(id);
-        return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+    ResponseEntity<?> deleteRecipe(@AuthenticationPrincipal UserDetails details,
+                                   @PathVariable long id) {
+        Optional<Recipe> optionalRecipe = recipeService.getRecipe(id);
+        if (optionalRecipe.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else if (optionalRecipe.get().getUser().getEmail().equals(details.getUsername())) {
+            recipeService.deleteRecipe(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @PutMapping("/api/recipe/{id}")
-    ResponseEntity<?> putRecipe(@PathVariable long id, @Valid @RequestBody Recipe recipe) {
-        boolean updated = recipeService.updateRecipeById(id, recipe);
-        return new ResponseEntity<>(updated ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+    ResponseEntity<?> updateRecipe(@AuthenticationPrincipal UserDetails details,
+                                   @PathVariable long id,
+                                   @Valid @RequestBody Recipe recipe) {
+        Optional<Recipe> optionalRecipe = recipeService.getRecipe(id);
+        if (optionalRecipe.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else if (optionalRecipe.get().getUser().getEmail().equals(details.getUsername())) {
+            recipe.setUser(optionalRecipe.get().getUser());
+            recipeService.updateRecipeById(id, recipe);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @GetMapping("/api/recipe/search")
@@ -63,7 +87,7 @@ public class RecipesController {
         } else if (category != null) {
             return ResponseEntity.ok(recipeService.getRecipesByCategory(category));
         } else {
-            return ResponseEntity.ok(recipeService.getContainingName(name));
+            return ResponseEntity.ok(recipeService.getRecipesContainingName(name));
         }
     }
 }
